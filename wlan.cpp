@@ -4,6 +4,9 @@
 #include <wlanapi.h>
 #include <iostream>
 
+// #include <wtypes.h>
+#include <stdio.h>
+
 int main()
 {
     HANDLE hClient = NULL;
@@ -34,6 +37,8 @@ int main()
         pIfInfo = (WLAN_INTERFACE_INFO *) &pIfList->InterfaceInfo[i];
         std::cout << "Interface Index: " << i << std::endl;
         std::cout << "Interface Description: " << pIfInfo->strInterfaceDescription << std::endl;
+        wprintf(L"Interface Description[%d]: %S\n", i, pIfInfo->strInterfaceDescription);
+
         std::cout << "Interface State: " << pIfInfo->isState << std::endl;
         // std::cout << "Interface GUID: " << pIfInfo->InterfaceGuid << std::endl;
 
