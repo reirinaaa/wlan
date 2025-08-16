@@ -5,7 +5,7 @@
 #include <iostream>
 
 // #include <wtypes.h>
-#include <stdio.h>
+#include <stdio.h> //For wprintf
 
 int main()
 {
@@ -17,15 +17,20 @@ int main()
     PWLAN_INTERFACE_INFO_LIST pIfList = NULL;
     PWLAN_INTERFACE_INFO pIfInfo = NULL;
 
-    dwResult = WlanOpenHandle(dwMaxClient, NULL, &dwCurVersion, &hClient); 
-    if (dwResult != ERROR_SUCCESS)  {
+    int iRet = 0;
+    WCHAR GuidString[40] = {0};
+
+    dwResult = WlanOpenHandle(dwMaxClient, NULL, &dwCurVersion, &hClient);
+    if (dwResult != ERROR_SUCCESS)
+    {
         std::cout << "WlanOpenHandle failed with error: " << dwResult << std::endl;
         return 1;
     }
     std::cout << "WlanOpenHandle success" << std::endl;
 
-    dwResult = WlanEnumInterfaces(hClient, NULL, &pIfList); 
-    if (dwResult != ERROR_SUCCESS)  {
+    dwResult = WlanEnumInterfaces(hClient, NULL, &pIfList);
+    if (dwResult != ERROR_SUCCESS)
+    {
         std::cout << "WlanOpenHandle failed with error: " << dwResult << std::endl;
         return 1;
     }
@@ -33,26 +38,27 @@ int main()
     std::cout << "Num Entries: " << pIfList->dwNumberOfItems << std::endl;
     std::cout << "Current Index: " << pIfList->dwIndex << std::endl;
 
-    for (int i = 0; i < (int) pIfList->dwNumberOfItems; i++) {
-        pIfInfo = (WLAN_INTERFACE_INFO *) &pIfList->InterfaceInfo[i];
+    for (int i = 0; i < (int)pIfList->dwNumberOfItems; i++)
+    {
+        pIfInfo = (WLAN_INTERFACE_INFO *)&pIfList->InterfaceInfo[i];
         std::cout << "Interface Index: " << i << std::endl;
+
         std::cout << "Interface Description: " << pIfInfo->strInterfaceDescription << std::endl;
+        std::wcout << "Interface Description: " << pIfInfo->strInterfaceDescription << std::endl;
         wprintf(L"Interface Description[%d]: %S\n", i, pIfInfo->strInterfaceDescription);
 
+        iRet = StringFromGUID2(pIfInfo->InterfaceGuid, (LPOLESTR) &GuidString, 39);
+        // For c rather than C++ source code, the above line needs to be
+        // iRet = StringFromGUID2(&pIfInfo->InterfaceGuid, (LPOLESTR) &GuidString, 39);
+        if (iRet == 0)
+            wprintf(L"StringFromGUID2 failed\n");
+        else {
+            wprintf(L"InterfaceGUID[%d]: %S\n",i, GuidString);
+        }
+
         std::cout << "Interface State: " << pIfInfo->isState << std::endl;
-        // std::cout << "Interface GUID: " << pIfInfo->InterfaceGuid << std::endl;
-
-
-        // iRet = StringFromGUID2(pIfInfo->InterfaceGuid, (LPOLESTR) &GuidString, 39); 
-        // // For c rather than C++ source code, the above line needs to be
-        // // iRet = StringFromGUID2(&pIfInfo->InterfaceGuid, (LPOLESTR) &GuidString, 39); 
-        // if (iRet == 0)
-        //     wprintf(L"StringFromGUID2 failed\n");
-        // else {
-        //     wprintf(L"  InterfaceGUID[%d]: %ws\n",i, GuidString);
-        // }    
-
-        switch (pIfInfo->isState) {
+        switch (pIfInfo->isState)
+        {
         case wlan_interface_state_not_ready:
             std::cout << "Not ready" << std::endl;
             break;
@@ -84,7 +90,8 @@ int main()
         std::cout << std::endl;
     }
 
-    if (pIfList != NULL) {
+    if (pIfList != NULL)
+    {
         WlanFreeMemory(pIfList);
         pIfList = NULL;
     }
